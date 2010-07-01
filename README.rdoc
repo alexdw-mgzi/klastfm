@@ -1,0 +1,40 @@
+== Klastfm
+
+This tool grabs your statistic from last.fm and merges it into your existing amarok database.
+The idea is derived from "Last Sync" which you can find here: http://kde-apps.org/content/show.php/Last+Sync?content=65784
+I think the idea is pretty cool, but "Last Sync" is too old to work with newer versions of amarok. The last version is from 2007 and the main problems are that it handles sqlite databases only and it uses the legacy last.fm api.
+The tool will take some time. It took 20 minutes for my ~135000 tracks.
+Right now it also scores your tracks by some voodoo algorithm. This definitely needs to be improved!
+
+== Dependencies
+
+= Ruby
+
+I tested on Kubuntu lucid with ruby 1.8.7 (2010-01-10 patchlevel 249) [x86_64-linux]
+
+= Some Ruby gems
+
+* rubygems
+* active_record
+* httparty
+* progressbar
+
+== Howto
+
+* BACKUP YOUR DATABASE! you have been warned! :)
+* edit the config/config.yaml
+* ruby klastfm.rb
+
+== Version
+
+* 0.1 Initial commit
+
+== Left to do
+
+* Think of a better algorithm to score tracks http://amarok.kde.org/wiki/Fr:FAQ#How_are_track_ratings_determined.3F
+* "Last Sync" has a different approach to also track the first and last played date. Seems to be nice to have!
+
+== Credits
+
+* Code by Johannes Leers http://www.gauda.de
+* Thanks to Kevin Bocksrocker for the inspiration http://kde-apps.org/content/show.php/Last+Sync?content=65784
