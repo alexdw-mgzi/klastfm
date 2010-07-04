@@ -5,6 +5,7 @@ The idea is derived from "Last Sync" which you can find here: http://kde-apps.or
 I think the idea is pretty cool, but "Last Sync" is too old to work with newer versions of amarok. The last version is from 2007 and the main problems are that it handles sqlite databases only and it uses the legacy last.fm api.
 The tool will take some time. It took 20 minutes for my ~135000 tracks.
 Right now it also scores your tracks by some voodoo algorithm. This definitely needs to be improved!
+Also listet on kde-apps.org http://kde-apps.org/content/show.php?content=127016
 
 == Dependencies
 
