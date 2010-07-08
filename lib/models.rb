@@ -3,7 +3,7 @@ class Artist < ActiveRecord::Base
 end
 
 class Track < ActiveRecord::Base
-  belongs_to :artist, :foreign_key => 'artist', :primary_key => 'id'
+  belongs_to :artist, :foreign_key => 'artist'#, :primary_key => 'id'
   belongs_to :statistic, :foreign_key => 'url', :primary_key => 'url'
 end
 

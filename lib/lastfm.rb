@@ -10,8 +10,13 @@ class Lastfm
   def all_tracks
     options = {:method => 'library.gettracks', :page => 1}
     response = self.class.get('/', :query => options)
-    total_pages = response['lfm']['tracks']['totalPages'].to_i
-#    total_pages = 1
+    begin
+      total_pages = response['lfm']['tracks']['totalPages'].to_i
+#     total_pages = 1
+    rescue NoMethodError
+      puts "ERROR: are you sure you edited the config/config.yaml and added your last.fm api key?"
+      raise
+    end
 
     tracks = []
     puts "getting ca. #{total_pages*50} tracks from last.fm"

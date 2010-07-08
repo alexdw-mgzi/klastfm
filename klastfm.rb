@@ -25,7 +25,7 @@ class Klastfm
       :username => config['username'],
       :password => config['password']
     )
-    ActiveRecord::Base.logger = Logger.new(File.open('log/database.log', 'a'))
+    ActiveRecord::Base.logger = Logger.new('log/database.log')
 
     all_entries, all_tracks = Lastfm.new(lastfm_user, lastfm_api_key).all_tracks
     div = all_entries/100.0
