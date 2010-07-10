@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 class Klastfm
   require 'rubygems'
   require 'yaml'
@@ -15,16 +17,19 @@ class Klastfm
       raise "config/config.yaml not found"
     end
 
-    lastfm_user = config['lastfm_user']
-    lastfm_api_key = config['lastfm_api_key']
+    lastfm_user = config['lastfm']['user']
+    lastfm_api_key = config['lastfm']['api_key']
 
-    ActiveRecord::Base.establish_connection(
-      :adapter  => 'mysql',
-      :host     => config['host'],
-      :database => config['database'],
-      :username => config['username'],
-      :password => config['password']
-    )
+    ActiveRecord::Base.establish_connection(config['mysql'].merge({:adapter => 'mysql'}))
+
+    # anyone knows how to test the db-connection?
+    begin
+      Track.first
+    rescue Mysql::Error
+      puts "Cannot connect to the database. Check config/config.yaml"
+      raise
+    end
+
     ActiveRecord::Base.logger = Logger.new('log/database.log')
 
     all_entries, all_tracks = Lastfm.new(lastfm_user, lastfm_api_key).all_tracks
@@ -43,7 +48,7 @@ class Klastfm
         tracks_not_found << "#{entry[:artist]} - #{entry[:title]}"
         next
       end
-      
+
       score = begin
         ((all_entries-i)/div)
       rescue ZeroDivisionError; 0; end
