@@ -1,5 +1,7 @@
 # mysql settings
 mysql:
+  #uncomment this (and correct the path) if you're using amarok with embedded mysql
+  #socket: ~/.kde4/share/apps/amarok/sock
   host: localhost
   database: amarok_database
   username: amarok_username
