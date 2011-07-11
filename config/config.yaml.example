@@ -8,6 +8,10 @@ mysql:
   password: amarok_password
 
 # lastfm settings
+# tag_greater_than: 0 -> if you do not wish to tag your media
+# set_dates: false -> if you do not with to fill out the first and last listened at fields
 lastfm:
   user: your_lastfm_username
   api_key: your_lastfm_api_key
+  tag_greater_than: 70
+  set_dates: true
