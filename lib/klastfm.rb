@@ -21,33 +21,29 @@ class Klastfm
     ActiveRecord::Base.establish_connection(config['mysql'].merge({:adapter => 'mysql', :encoding => 'utf8'}))
     ActiveRecord::Base.logger = Logger.new('log/database.log')
 
+    # just a random request to check if everything is ok
     # anyone knows how to test the db-connection?
     begin
       Track.first
     rescue Mysql::Error
-      puts 'Cannot connect to the database. Check config/config.yaml'
-      raise
+      raise 'Cannot connect to the database. Check config/config.yaml'
     end
 
-    @lastfm = Lastfm.new(config['lastfm']['user'], config['lastfm']['api_key'], config['lastfm']['tag_greater_than'])
-#    @load_all_tracks_from_yaml = ARGV.first.present?
+    @lastfm = Lastfm.new(config['lastfm']['user'], config['lastfm']['api_key'])
     @set_dates = config['lastfm']['set_dates']
-    @tag_tracks = config['lastfm']['tag_greater_than'].to_i.nonzero?
+
+    begin
+      @lastfm.test_the_connection_to_lastfm
+    rescue
+      raise "ERROR: Connection to last.fm failed. Are you sure you added your last.fm api key to config/config.yaml?"
+    end
 
     @all_tracks = nil
-    @all_tags = []
     @pages = nil
   end
 
   def get_all_tracks
-#    if @load_all_tracks_from_yaml
-#      raise 'data/all_tracks.yaml does not exist' unless File.exists?('data/all_tracks.yaml')
-#      puts 'loading all tracks from yaml'
-#      @all_tracks = YAML.load_file('data/all_tracks.yaml')
-#    else
-      Dir.glob('data/*.yaml').map { |f| File.delete(f) }
-      @all_tracks = @lastfm.all_tracks(@pages)
-#    end
+    @all_tracks = @lastfm.all_tracks(@pages)
   end
 
   def create_statistics
@@ -73,7 +69,7 @@ class Klastfm
       next if track.nil?
       score = begin
         ((@all_tracks.size-track[:index])/(@all_tracks.size/100.0))
-      rescue ZeroDivisionError; 0; end
+      rescue ZeroDivisionError; 0 end
       track[:score] = score<0 ? 0 : score
     end
   end
@@ -102,8 +98,7 @@ class Klastfm
         end
       end
     end
-    File.open('data/all_tracks_not_found_in_your_collection.yaml', 'w') {|f| f.write( tracks_not_found.to_yaml ) }
-#    File.open('data/all_tracks.yaml', 'w') {|f| f.write( @all_tracks.ya2yaml ) }
+    File.open('data/all_tracks_not_found_in_your_collection.yaml', 'w') {|f| f.write( tracks_not_found.sort.to_yaml ) }
     bar.finish && puts
   end
 
@@ -125,48 +120,6 @@ class Klastfm
                 :accessdate => track[:accessdate],
                 :createdate => track[:createdate]
         )
-      end
-    end
-    bar.finish && puts
-  end
-
-  def tag_tracks
-    return unless @tag_tracks
-    puts "getting all tags for the tracks"
-    bar = ProgressBar.new('tagging', @all_tracks.size)
-    @all_tracks.each do |_,track|
-      bar.inc
-      next if track.nil?
-      track[:tags] = @lastfm.tags(track[:artist], track[:title])
-      @all_tags << track[:tags]
-    end
-    bar.finish && puts
-  end
-
-  def save_tags!
-    return unless @tag_tracks
-    @all_tags.flatten!.uniq!
-    puts "saving all tags"
-    bar = ProgressBar.new('saving', @all_tags.size)
-    @all_tags.each do |tag|
-      bar.inc
-      Tag.find_or_create_by_label(tag)
-    end
-    bar.finish && puts
-
-    puts "saving all taggings"
-    bar = ProgressBar.new('saving', @all_tracks.size)
-    @all_tracks.each do |_,track|
-      bar.inc
-      track[:tags].each do |tag|
-        tag_id = Tag.id_of(tag)
-        next unless tag_id
-        url = Track.url_of(track[:artist], track[:title])
-        next unless url
-        Tagging.find_or_create_by_url_and_label(url, tag_id, {
-                :url => url,
-                :label => tag_id
-        })
       end
     end
     bar.finish && puts

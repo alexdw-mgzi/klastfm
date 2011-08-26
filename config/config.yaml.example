@@ -1,17 +1,15 @@
 # mysql settings
 mysql:
-  #uncomment this (and correct the path) if you're using amarok with embedded mysql
-  #socket: ~/.kde4/share/apps/amarok/sock
+  # uncomment this (and correct the path) if you're using amarok with embedded mysql
+  # socket: ~/.kde4/share/apps/amarok/sock
   host: localhost
   database: amarok_database
   username: amarok_username
   password: amarok_password
 
 # lastfm settings
-# tag_greater_than: 0 -> if you do not wish to tag your media
-# set_dates: false -> if you do not with to fill out the first and last listened at fields
+# set_dates: false -> if you do not wish to fill out the first- and last-listened-at fields (faster!)
 lastfm:
   user: your_lastfm_username
   api_key: your_lastfm_api_key
-  tag_greater_than: 70
   set_dates: true

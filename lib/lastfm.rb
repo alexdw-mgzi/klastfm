@@ -2,18 +2,22 @@ class Lastfm
   include HTTParty
   base_uri 'ws.audioscrobbler.com/2.0'
 
-  def initialize(username, api_key, tag_greater_than)
+  def initialize(username, api_key)
     self.class.default_params :user => username, :api_key => api_key
-    @tag_greater_than = tag_greater_than.to_i
     #self.class.debug_output Logger.new('log/lastfm.log')
+  end
+
+  # just a random request to check if everything is ok
+  def test_the_connection_to_lastfm
+    get_with_retry({:method => 'library.gettracks', :page => 1})
   end
 
   def get_with_retry(query)
     retry_counter = 0
     begin
       self.class.get('/', :query => query)
-    rescue NoMethodError => e
-      raise e if retry_counter > 3
+    rescue Exception => e
+      raise e if retry_counter > 10
       retry_counter += 1
       sleep 5
       retry
@@ -23,17 +27,11 @@ class Lastfm
   def week_list(pages=nil)
     response =  get_with_retry({:method => 'user.getweeklychartlist'})['lfm']['weeklychartlist']['chart']
     pages.nil? ? response : response[1..pages]
-  rescue NoMethodError
-    puts "ERROR: are you sure you edited the config/config.yaml and added your last.fm api key?"
-    raise
   end
   
   def tracks_in_week(from, to)
     response = get_with_retry({:method => 'user.getWeeklyTrackChart', :from => from, :to => to})
     response['lfm']['weeklytrackchart']['track']
-  rescue NoMethodError
-    puts "ERROR: are you sure you edited the config/config.yaml and added your last.fm api key?"
-    raise
   end
 
   def all_tracks(pages=nil)
@@ -41,12 +39,7 @@ class Lastfm
       total_pages = pages
     else
       response = get_with_retry({:method => 'library.gettracks', :page => 1})
-      begin
-        total_pages = response['lfm']['tracks']['totalPages'].to_i
-      rescue NoMethodError
-        puts "ERROR: are you sure you edited the config/config.yaml and added your last.fm api key?"
-        raise
-      end
+      total_pages = response['lfm']['tracks']['totalPages'].to_i
     end
 
     tracks = {}
@@ -87,17 +80,6 @@ class Lastfm
         }
       rescue; end
     end
-#    File.open('data/lastfm_all_tracks.yaml', 'a') {|f| f.puts(lastfm.ya2yaml) }
     tracks
-  end
-
-  def tags(artist, track)
-    tags = []
-    return tags if artist.blank? || track.blank?
-    response = get_with_retry({:method => 'track.gettoptags', :artist => artist, :track => track})
-    response['lfm']['toptags']['tag'].each do |tag|
-      tags << tag['name'] if tag['count'].to_i > @tag_greater_than
-    end rescue nil
-    tags
   end
 end

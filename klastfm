@@ -17,13 +17,6 @@ if __FILE__ == $0
     klastfm.save_statistic!
   end
 
-  #Tagging.transaction do
-  #  Tag.transaction do
-  #    klastfm.tag_tracks
-  #    klastfm.save_tags!
-  #  end
-  #end
-
   puts "Runtime: #{((Time.now-t)/60).to_i} minutes"
 else
   puts "please read the README.rdoc"
