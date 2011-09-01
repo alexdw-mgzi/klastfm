@@ -85,9 +85,14 @@ class Klastfm
     week_list.each do |week|
       bar.inc
       @lastfm.tracks_in_week(week['from'], week['to']).each do |track|
-        url = Track.url_of(track['name'], track['artist'])
+        begin
+          url = Track.url_of(track['artist'], track['name'])
+        rescue TypeError => e
+          puts "Track Error: #{track.inspect}", e.inspect
+        end
         if url.nil? || @all_tracks[url].nil?
-          tracks_not_found << "#{track['artist']} - #{track['name']}"
+          artist_track_string = "#{track['artist']} - #{track['name']}"
+          tracks_not_found << artist_track_string unless tracks_not_found.include?(artist_track_string)
           next
         end
         if week['from'].to_i < @all_tracks[url][:createdate] || @all_tracks[url][:createdate].zero?
@@ -106,7 +111,6 @@ class Klastfm
     puts "save the statistics of all #{@all_tracks.size} tracks to database"
     bar = ProgressBar.new('saving', @all_tracks.size)
     @all_tracks.each do |_,track|
-      bar.inc
       artist = Artist.first(:conditions => ['name = ?', track[:artist]])
       next unless artist.present?
 
@@ -114,6 +118,11 @@ class Klastfm
               :conditions => ['artist = ? AND tracks.title = ?', artist.id, track[:title]],
               :include => 'track'
       ).each do |statistic|
+        #str = "#{track[:artist]} - #{track[:title]} playcount:#{track[:playcount]} score:#{track[:score]} "
+        #str += Time.at(track[:accessdate]).strftime("%Y-%m-%d %H:%I:%S") + " - " if track[:accessdate]
+        #str += Time.at(track[:createdate]).strftime("%Y-%m-%d %H:%I:%S") if track[:createdate]
+        #puts str
+
         statistic.update_attributes(
                 :playcount => track[:playcount],
                 :score => track[:score],
@@ -121,6 +130,7 @@ class Klastfm
                 :createdate => track[:createdate]
         )
       end
+      bar.inc
     end
     bar.finish && puts
   end

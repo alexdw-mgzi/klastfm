@@ -19,6 +19,7 @@ class Lastfm
     rescue Exception => e
       raise e if retry_counter > 10
       retry_counter += 1
+      puts "#{retry_counter}. retry: ", e.inspect
       sleep 5
       retry
     end
@@ -59,26 +60,27 @@ class Lastfm
   def tracks(page)
     response = get_with_retry({:method => 'library.gettracks', :page => page})
     tracks = {}
-    lastfm = []
-    response['lfm']['tracks']['track'].each_with_index do |track, i|
-      begin
-        lastfm << track
+    begin
+      response['lfm']['tracks']['track'].each_with_index do |track, i|
+        begin
+          url = Track.url_of(track['artist']['name'], track['name'])
+          next unless url
 
-        artist = track['artist']['name'].to_s
-        title = track['name'].to_s
-        url = Track.url_of(artist, title)
-        next unless url
-
-        tracks[url] = {
-                :artist => artist,
-                :title => title,
-                :playcount => track['playcount'].to_i,
-                :index => (page-1)*50+i,
-                :accessdate => 0,
-                :createdate => 0,
-                :score => 0
-        }
-      rescue; end
+          tracks[url] = {
+                  :artist => track['artist']['name'].to_s,
+                  :title => track['name'].to_s,
+                  :playcount => track['playcount'].to_i,
+                  :index => (page-1)*50+i,
+                  :accessdate => 0,
+                  :createdate => 0,
+                  :score => 0
+          }
+        rescue
+          puts "error with track", track
+        end
+      end
+    rescue NoMethodError
+      raise response.inspect
     end
     tracks
   end

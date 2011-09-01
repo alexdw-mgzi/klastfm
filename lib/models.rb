@@ -12,7 +12,7 @@ class Track < ActiveRecord::Base
   def self.url_of(artist, title)
     t = first(
             :select => 'tracks.url',
-            :conditions => [ "artists.name = ? AND title = ?", artist, title ],
+            :conditions => [ "LOWER(artists.name) = ? AND LOWER(title) = ?", artist.to_s.downcase, title.to_s.downcase ],
             :joins => :artist
     )
     t.nil? ? nil : t.url

@@ -31,6 +31,7 @@ Tested on Kubuntu natty with ruby 1.8.7 (2010-08-16 patchlevel 302) [x86_64-linu
 
 = Version
 
+* 0.5 More bugs fixed
 * 0.4 Refactoring and bug fixing
 * 0.3 Added the possibility to set first and last played date for each track
 * 0.2 Added some more installation help
