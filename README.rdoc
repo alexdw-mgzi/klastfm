@@ -24,6 +24,9 @@ Tested on Kubuntu natty with ruby 1.8.7 (2010-08-16 patchlevel 302) [x86_64-linu
 * Copy config.yaml.example to config.yaml and edit it (add your last.fm api key! Google for it!)
 * ruby ./klastfm
 
+There is a gentoo howto, too. Take a look here:
+* http://kde-apps.org/content/show.php?content=127016&forumpage=3#commentvoter414901 (Thanks to abelau)
+
 = Dependencies on Kubuntu Natty:
 
 * sudo apt-get install ruby ruby1.8-dev mysql-client libmysqlclient-dev libruby rubygems
