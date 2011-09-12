@@ -49,8 +49,6 @@ class Lastfm
 
     (1..total_pages).each do |page|
       tracks = tracks.merge(self.tracks(page))
-      # leave the pause since last.fm does not like too many request per second
-      sleep 1
       bar.inc
     end
     bar.finish && puts

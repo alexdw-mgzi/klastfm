@@ -8,8 +8,6 @@ mysql:
   password: amarok_password
 
 # lastfm settings
-# set_dates: false -> if you do not wish to fill out the first- and last-listened-at fields (faster!)
 lastfm:
   user: your_lastfm_username
   api_key: your_lastfm_api_key
-  set_dates: true

@@ -12,9 +12,11 @@ The idea is derived from "Last Sync" ( http://kde-apps.org/content/show.php/Last
 
 Bring some time! Since you will synchronize a lot with last.fm api this script will run a long time. For my account (ca. 32000 tracks) it needs nearly 2 hours!
 
-Listet on kde-apps.org http://kde-apps.org/content/show.php?content=127016
+Listed on kde-apps.org http://kde-apps.org/content/show.php?content=127016
 
 Sourcecode available at github.com http://github.com/gauda/klastfm
+
+When reporting errors, please include your last.fm username in the bugreport!
 
 = Howto
 
@@ -34,6 +36,7 @@ There is a gentoo howto, too. Take a look here:
 
 = Version
 
+* 0.6 More bugs fixed, removed the option to disable set dates functionality
 * 0.5 More bugs fixed
 * 0.4 Refactoring and bug fixing
 * 0.3 Added the possibility to set first and last played date for each track

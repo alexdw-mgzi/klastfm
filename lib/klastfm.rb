@@ -17,7 +17,6 @@ class Klastfm
     end
 
     Dir.mkdir('log') unless File.exists?('log')
-    Dir.mkdir('data') unless File.exists?('data')
     ActiveRecord::Base.establish_connection(config['mysql'].merge({:adapter => 'mysql', :encoding => 'utf8'}))
     ActiveRecord::Base.logger = Logger.new('log/database.log')
 
@@ -30,7 +29,6 @@ class Klastfm
     end
 
     @lastfm = Lastfm.new(config['lastfm']['user'], config['lastfm']['api_key'])
-    @set_dates = config['lastfm']['set_dates']
 
     begin
       @lastfm.test_the_connection_to_lastfm
@@ -75,7 +73,6 @@ class Klastfm
   end
 
   def date_tracks
-    return unless @set_dates
     Statistic.update_all('createdate = 0, accessdate = 0', ['url in (?)', @all_tracks.keys])
 
     week_list = @lastfm.week_list(@pages)
@@ -103,7 +100,7 @@ class Klastfm
         end
       end
     end
-    File.open('data/all_tracks_not_found_in_your_collection.yaml', 'w') {|f| f.write( tracks_not_found.sort.to_yaml ) }
+    File.open('log/all_tracks_not_found_in_your_collection.yaml', 'w') { |f| f.write(tracks_not_found.sort.to_yaml) }
     bar.finish && puts
   end
 
@@ -111,13 +108,22 @@ class Klastfm
     puts "save the statistics of all #{@all_tracks.size} tracks to database"
     bar = ProgressBar.new('saving', @all_tracks.size)
     @all_tracks.each do |_,track|
-      artist = Artist.first(:conditions => ['name = ?', track[:artist]])
-      next unless artist.present?
+      artist = Artist.first(:conditions => ['LOWER(name) = ?', track[:artist].downcase])
+      unless artist.present?
+        #puts "Artist not found: #{track[:artist]}"
+        next
+      end
 
-      Statistic.all(
-              :conditions => ['artist = ? AND tracks.title = ?', artist.id, track[:title]],
+      s = Statistic.all(
+              :conditions => ['artist = ? AND LOWER(tracks.title) = ?', artist.id, track[:title].downcase],
               :include => 'track'
-      ).each do |statistic|
+      )
+      unless s
+        #puts "Statistic not found: #{track[:artist]} - #{track[:title]}"
+        next
+      end
+
+      s.each do |statistic|
         #str = "#{track[:artist]} - #{track[:title]} playcount:#{track[:playcount]} score:#{track[:score]} "
         #str += Time.at(track[:accessdate]).strftime("%Y-%m-%d %H:%I:%S") + " - " if track[:accessdate]
         #str += Time.at(track[:createdate]).strftime("%Y-%m-%d %H:%I:%S") if track[:createdate]
